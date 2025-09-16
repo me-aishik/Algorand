@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, QrCode, Calendar, User, Hash, ChevronLeft, ChevronRight, Wallet, Copy, CheckCircle2 } from 'lucide-react';
+import { Trophy, QrCode, Calendar, User, Hash, ChevronLeft, ChevronRight, Wallet, Copy, CheckCircle2, FileSearch } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import GlowingButton from '../components/GlowingButton';
 import { useWallet } from '../components/wallet/WalletContext';
@@ -13,6 +13,77 @@ interface NFTCard {
   hash: string;
   rarity: 'common' | 'rare' | 'legendary';
 }
+
+const TypingAnimation = ({ text }: { text: string }) => {
+  const [displayedText, setDisplayedText] = useState('');
+
+  useEffect(() => {
+    let index = 0;
+    setDisplayedText('');
+    
+    const interval = setInterval(() => {
+      if (index < text.length) {
+        setDisplayedText(prev => prev + text[index]);
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 50); // Adjust typing speed here (milliseconds)
+
+    return () => clearInterval(interval);
+  }, [text]);
+
+  return (
+    <motion.span
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="font-mono"
+    >
+      {displayedText}
+      <motion.span
+        animate={{ opacity: [1, 0] }}
+        transition={{ duration: 0.5, repeat: Infinity }}
+      >
+        |
+      </motion.span>
+    </motion.span>
+  );
+};
+
+const NoCertificatesMessage = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-center py-12"
+    >
+      <GlassCard className="max-w-md mx-auto">
+        <div className="p-8 space-y-6">
+          <motion.div 
+            className="w-16 h-16 mx-auto bg-gray-800/50 rounded-full flex items-center justify-center"
+            animate={{ 
+              scale: [1, 1.05, 1],
+              rotate: [0, 5, -5, 0]
+            }}
+            transition={{ 
+              duration: 3, 
+              repeat: Infinity,
+              repeatType: "reverse" 
+            }}
+          >
+            <FileSearch className="w-8 h-8 text-cyan-400" />
+          </motion.div>
+          <div className="space-y-3">
+            <h3 className="text-xl font-semibold text-white">No Certificates Found</h3>
+            <div className="text-gray-400">
+              <TypingAnimation text="Your wallet is awaiting its first verified certificate" />
+            </div>
+          </div>
+        </div>
+      </GlassCard>
+    </motion.div>
+  );
+};
 
 const WalletAddressDisplay = ({ address }: { address: string }) => {
   const [copied, setCopied] = useState(false);
@@ -146,6 +217,16 @@ const NFTCollectionCard = ({ nft }: { nft: NFTCard }) => {
 const AttendeeDashboard = () => {
   const { address, connect } = useWallet();
   const [currentCardIndex, setCurrentCardIndex] = useState<number>(0);
+  const [hasCertificates, setHasCertificates] = useState<boolean>(false);
+  
+  // Simulated fetch of certificates
+  useEffect(() => {
+    if (address) {
+      // Here you would normally fetch certificates from the blockchain
+      // For now, we're using the nftCollection array to simulate
+      setHasCertificates(nftCollection.length > 0);
+    }
+  }, [address]);
   
   const nftCollection: NFTCard[] = [
     {
@@ -273,45 +354,49 @@ const AttendeeDashboard = () => {
           </GlassCard>
         </motion.div>
 
-        {/* NFT Collection */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <div className="relative">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentCardIndex}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                className="w-full"
-              >
-                <NFTCollectionCard nft={nftCollection[currentCardIndex]} />
-              </motion.div>
-            </AnimatePresence>
+        {/* Certificates Section */}
+        {hasCertificates ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="relative">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentCardIndex}
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  className="w-full"
+                >
+                  <NFTCollectionCard nft={nftCollection[currentCardIndex]} />
+                </motion.div>
+              </AnimatePresence>
 
-            {nftCollection.length > 1 && (
-              <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between pointer-events-none">
-                <GlowingButton
-                  onClick={prevCard}
-                  className="!p-2 pointer-events-auto"
-                  aria-label="Previous NFT"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </GlowingButton>
-                <GlowingButton
-                  onClick={nextCard}
-                  className="!p-2 pointer-events-auto"
-                  aria-label="Next NFT"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </GlowingButton>
-              </div>
-            )}
-          </div>
-        </motion.div>
+              {nftCollection.length > 1 && (
+                <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between pointer-events-none">
+                  <GlowingButton
+                    onClick={prevCard}
+                    className="!p-2 pointer-events-auto"
+                    aria-label="Previous NFT"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </GlowingButton>
+                  <GlowingButton
+                    onClick={nextCard}
+                    className="!p-2 pointer-events-auto"
+                    aria-label="Next NFT"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </GlowingButton>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        ) : (
+          <NoCertificatesMessage />
+        )}
         </motion.div>
       )}
     </div>

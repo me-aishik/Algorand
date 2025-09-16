@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, QrCode, Calendar, User, Hash, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
+import { Trophy, QrCode, Calendar, User, Hash, ChevronLeft, ChevronRight, Wallet, Copy, CheckCircle2 } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import GlowingButton from '../components/GlowingButton';
 import { useWallet } from '../components/wallet/WalletContext';
@@ -13,6 +13,46 @@ interface NFTCard {
   hash: string;
   rarity: 'common' | 'rare' | 'legendary';
 }
+
+const WalletAddressDisplay = ({ address }: { address: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const formatAddress = (addr: string) => {
+    if (!addr) return '';
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  return (
+    <motion.div
+      className="flex items-center justify-center gap-2 mt-2"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.2 }}
+    >
+      <div className="px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-700">
+        <code className="font-mono text-sm text-gray-300">{formatAddress(address)}</code>
+      </div>
+      <motion.button
+        onClick={handleCopy}
+        className="p-2 rounded-lg hover:bg-gray-800 transition-colors duration-200"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {copied ? (
+          <CheckCircle2 className="w-4 h-4 text-green-400" />
+        ) : (
+          <Copy className="w-4 h-4 text-gray-400" />
+        )}
+      </motion.button>
+    </motion.div>
+  );
+};
 
 const NFTCollectionCard = ({ nft }: { nft: NFTCard }) => {
   const getRarityColor = (rarity: string) => {
@@ -193,6 +233,23 @@ const AttendeeDashboard = () => {
           animate={{ opacity: 1 }}
           className="space-y-8"
         >
+          {/* Connected Wallet Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <GlassCard className="max-w-md mx-auto">
+              <div className="p-4 text-center space-y-2">
+                <div className="flex items-center justify-center gap-2">
+                  <Wallet className="w-5 h-5 text-cyan-400" />
+                  <h3 className="text-lg font-semibold text-white">Connected Wallet</h3>
+                </div>
+                <WalletAddressDisplay address={address} />
+              </div>
+            </GlassCard>
+          </motion.div>
+
           {/* Gamification Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

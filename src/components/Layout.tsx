@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Home, User, Users, Shield } from 'lucide-react';
+import { WalletConnect } from './wallet/WalletConnect';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="relative z-10 min-h-screen pb-20">
+      {/* Header with Wallet Connection */}
+      <header className="container mx-auto px-4 py-4 flex justify-end">
+        <WalletConnect />
+      </header>
+      
       <main className="container mx-auto px-4 py-8">
         {children}
       </main>

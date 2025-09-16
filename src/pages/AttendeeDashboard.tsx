@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, QrCode, Calendar, User, Hash, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trophy, QrCode, Calendar, User, Hash, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import GlowingButton from '../components/GlowingButton';
+import { useWallet } from '../components/wallet/WalletContext';
 
 interface NFTCard {
   id: number;
@@ -103,6 +104,7 @@ const NFTCollectionCard = ({ nft }: { nft: NFTCard }) => {
 };
 
 const AttendeeDashboard = () => {
+  const { address, connect } = useWallet();
   const [currentCardIndex, setCurrentCardIndex] = useState<number>(0);
   
   const nftCollection: NFTCard[] = [
@@ -141,7 +143,7 @@ const AttendeeDashboard = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto min-h-[80vh] flex flex-col">
       <motion.h1
         className="text-3xl md:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent"
         initial={{ opacity: 0, y: -20 }}
@@ -150,12 +152,52 @@ const AttendeeDashboard = () => {
         Attendee Dashboard
       </motion.h1>
 
-      <div className="space-y-8">
-        {/* Gamification Badge */}
+      {!address ? (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex-1 flex items-center justify-center"
+        >
+          <GlassCard className="max-w-md mx-auto p-8">
+            <div className="text-center space-y-6">
+              <motion.div
+                className="w-24 h-24 mx-auto bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center"
+                animate={{ 
+                  rotate: [0, 360],
+                  transition: { duration: 20, repeat: Infinity, ease: "linear" }
+                }}
+              >
+                <motion.div
+                  className="w-20 h-20 rounded-full bg-gray-900 flex items-center justify-center"
+                  initial={{ rotate: 0 }}
+                >
+                  <Wallet className="w-12 h-12 text-white" />
+                </motion.div>
+              </motion.div>
+
+              <h2 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h2>
+              <p className="text-gray-400 mb-6">Connect your Algorand wallet to view your NFT collection</p>
+              
+              <GlowingButton
+                onClick={connect}
+                className="w-full"
+              >
+                Connect Algorand Wallet
+              </GlowingButton>
+            </div>
+          </GlassCard>
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="space-y-8"
+        >
+          {/* Gamification Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
         >
           <GlassCard className="max-w-md mx-auto">
             <div className="flex items-center justify-center gap-4">
@@ -213,7 +255,8 @@ const AttendeeDashboard = () => {
             )}
           </div>
         </motion.div>
-      </div>
+        </motion.div>
+      )}
     </div>
   );
 };

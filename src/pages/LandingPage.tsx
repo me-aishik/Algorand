@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Users, User, Shield, Sparkles } from 'lucide-react';
 import GlowingButton from '../components/GlowingButton';
 import FloatingElement from '../components/FloatingElement';
+import { TypeAnimation } from 'react-type-animation';
 
 const LandingPage: React.FC = () => {
   return (
@@ -15,14 +16,27 @@ const LandingPage: React.FC = () => {
         transition={{ duration: 1 }}
         className="text-center mb-16"
       >
-        <motion.h1 
-          className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+        <motion.div 
+          className="text-5xl md:text-7xl font-bold mb-6"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-          Own Your Attendance
-        </motion.h1>
+          <TypeAnimation
+            sequence={[
+              'Own Your Attendance',
+              2000,
+              'Own Your Presence',
+              2000,
+              'Own Your Identity',
+              2000,
+            ]}
+            wrapper="h1"
+            speed={50}
+            repeat={Infinity}
+            className="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+          />
+        </motion.div>
         <motion.p 
           className="text-xl md:text-2xl text-gray-300 mb-8"
           initial={{ opacity: 0 }}

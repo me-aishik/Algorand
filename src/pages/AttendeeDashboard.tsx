@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, QrCode, Calendar, User, Hash, ChevronLeft, ChevronRight, Wallet, Copy, CheckCircle2, FileSearch } from 'lucide-react';
+import { Trophy, QrCode, Calendar, User, Hash, ChevronLeft, ChevronRight, Wallet, Copy, CheckCircle2, FileSearch, X, Download } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import GlowingButton from '../components/GlowingButton';
 import { useWallet } from '../components/wallet/WalletContext';
@@ -125,7 +125,122 @@ const WalletAddressDisplay = ({ address }: { address: string }) => {
   );
 };
 
+interface CertificatePopupProps {
+  nft: NFTCard;
+  onClose: () => void;
+}
+
+const CertificatePopup = ({ nft, onClose }: CertificatePopupProps) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="w-full max-w-3xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <GlassCard>
+          <div className="p-6 space-y-6">
+            {/* Header */}
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">{nft.eventName}</h2>
+                <p className="text-gray-400">Certificate of Attendance</p>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-6 h-6 text-gray-400" />
+              </button>
+            </div>
+
+            {/* Certificate Content */}
+            <div className="space-y-8">
+              {/* QR Section */}
+              <div className="flex justify-center">
+                <motion.div
+                  className="w-48 h-48 bg-gradient-to-br from-cyan-500 to-purple-500 p-1 rounded-2xl"
+                  animate={{
+                    boxShadow: [
+                      '0 0 20px rgba(6, 182, 212, 0.2)',
+                      '0 0 30px rgba(168, 85, 247, 0.4)',
+                      '0 0 20px rgba(6, 182, 212, 0.2)'
+                    ]
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    repeatType: "reverse"
+                  }}
+                >
+                  <div className="w-full h-full bg-gray-900 rounded-xl p-4 flex items-center justify-center">
+                    <QrCode className="w-full h-full text-white" />
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Certificate Details */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="text-gray-400 text-sm">Event Date</div>
+                    <div className="text-white font-medium">
+                      {new Date(nft.date).toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-gray-400 text-sm">Organizer</div>
+                    <div className="text-white font-medium">{nft.organizer}</div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="text-gray-400 text-sm">Certificate Hash</div>
+                    <div className="text-white font-mono text-sm break-all">{nft.hash}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-gray-400 text-sm">Rarity</div>
+                    <div className="text-white font-medium capitalize">{nft.rarity}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
+              <GlowingButton
+                onClick={() => {
+                  // Add download functionality here
+                  console.log('Downloading certificate...');
+                }}
+                className="!px-6"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Download Certificate
+              </GlowingButton>
+            </div>
+          </div>
+        </GlassCard>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const NFTCollectionCard = ({ nft }: { nft: NFTCard }) => {
+  const [showCertificate, setShowCertificate] = useState(false);
+
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case 'legendary': return 'from-yellow-400 to-orange-500';
@@ -203,13 +318,25 @@ const NFTCollectionCard = ({ nft }: { nft: NFTCard }) => {
             </div>
 
             <div className="pt-4 flex flex-wrap gap-2">
-              <GlowingButton className="w-full sm:w-auto">
+              <GlowingButton 
+                className="w-full sm:w-auto"
+                onClick={() => setShowCertificate(true)}
+              >
                 View Certificate
               </GlowingButton>
             </div>
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showCertificate && (
+          <CertificatePopup
+            nft={nft}
+            onClose={() => setShowCertificate(false)}
+          />
+        )}
+      </AnimatePresence>
     </GlassCard>
   );
 };
